@@ -67,7 +67,7 @@ def execTask(task,check_interval=15,exit_on_error= True):
     print ('')
     print (f"Task finished at {end_time_f}")
     print ("Duration: "+str(round((end_time-start_time)/60,2))+" minutes")
-    return task.status().get('destination_uris')[0][84:]
+    return task.status().get('destination_uris')[0][78:]
 
 def toNatural(img):
   return ee.Image(ee.Image(10.0).pow(img.divide(10.0)).copyProperties(img,['system:time_start','sliceNumber']))
