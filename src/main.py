@@ -86,6 +86,10 @@ def main():
                                 os.path.join(output_options['local_export_folder'],
                                              output_options[
                                                  'output_prefix'] + "_CR2_" + initial_data + "_" + end_data + ".shp"))
+        # write trigger file
+        with open(os.path.join(output_options['local_export_folder'], 'trigger.txt'), 'w') as fp:
+            pass
+        # Export to drive
         task = ee.batch.Export.table.toDrive(collection=sar_tmp_mask,
                                              description=output_options[
                                                              'output_prefix'] + "_CR2_" + initial_data + "_" + end_data,
@@ -117,8 +121,7 @@ def main():
             ee.data.renameAsset(sar_mask_asset + "_tmp", sar_mask_asset)
         except:
             print("Warning: There was an error updating the CR2 mask. Please verify assets.")
-    else:
-        print("Not CR2 polygons on this run.")
+
 
     # 5 - End of run
 
