@@ -50,7 +50,7 @@ def get_raster_warnings(img_id, sar_tmp_mask, config):
         .map(toGamma0natural) \
         .select(["VHg0", "VVg0", "LIA"])
 
-    if config['image_selection']['orbit_overlap'] == 'False':
+    if config['image_selection']['allow_orbit_overlap'] == 'False':
         colS1 = colS1.filterMetadata("relativeOrbitNumber_start", "equals", img.get('relativeOrbitNumber_start'))
     if config['image_selection']['include_S1B'] == 'False':
         colS1 = colS1.filterMetadata("platform_number", "equals", "A")

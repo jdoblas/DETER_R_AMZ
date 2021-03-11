@@ -1,0 +1,36 @@
+[image_selection]
+area_of_interest       = {path_to_AOI_EE_asset}
+selection_mode         = {ingestion_date|detection,date}
+include_S1B            = {True|False}
+allow_orbit_overlap    = {True|False}
+
+[detection]
+general_scale          = 20
+threshold_mode         = logistic
+threshold_min          = 2.5
+threshold_max          = 3.94
+confirmation_threshold = 1.11
+intensity_threshold    = 9
+area_threshold         = 1
+learning_period_years  = 2
+detection_months       = 2
+
+[post_processing]
+contract_pixels        = 1
+opening_pixels         = 3
+
+[masks]
+static                 = {path_to_EE_img_initial_non_forest_mask}
+historic_deforestation = {path_to_EE_img_human_induced_deforestation}
+updated_deforestation  = {path_to_EE_img_new_deforestation_asset}
+complementary_sar      = {path_to_EE_newly_detected_deforestation_if_any}
+ongoing_sar            = {path_to_EE_ongoing_SAR_deforestation_asset}
+update_sar_mask        = {True|False}
+
+[output]
+output_prefix          = {string}
+local_log_folder       = {local_folder}
+local_export_folder    = {local_folder}
+asset_export_folder    = {EE_asset_folder}
+gdrive_export_folder   = {gdrive_folder}
+export_footprints      = {True|False}
