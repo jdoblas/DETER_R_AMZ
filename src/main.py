@@ -88,7 +88,9 @@ def main():
                                                  'output_prefix'] + "_CR2_" + initial_data + "_" + end_data + ".shp"))
         # write trigger file
         with open(os.path.join(output_options['local_export_folder'], 'trigger.txt'), 'w') as fp:
-            pass
+            descripition = output_options['output_prefix'] + "_CR2_" + initial_data + "_" + end_data + ".shp"
+            fp.write(description)
+            fp.close()
         # Export to drive
         task = ee.batch.Export.table.toDrive(collection=sar_tmp_mask,
                                              description=output_options[
