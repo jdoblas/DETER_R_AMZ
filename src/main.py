@@ -51,25 +51,19 @@ def main():
     # 2 - Initiate main loop
     print("Starting detection")
     i = 1
-    sar_tmp_mask = ee.FeatureCollection([])
+    detected_pols = ee.FeatureCollection([])
     for image_id in new_images_id_list.values:
         image_id = image_id[0]
         print("Processing image " + str(i) + "/" + str(new_images_id_list.count()[0]) + ": " + image_id)
         img_start_time = datetime.datetime.now()
 
         # Detection
-        raster_task = get_raster_warnings(image_id, sar_tmp_mask, config)
+        raster_task = get_raster_warnings(image_id, detected_pols, config)
         asset = execTask(raster_task)
 
         # Vectorize detection raster asset
         print("Computing warning polygons on " + asset)
-        vector_task, sar_tmp_mask = get_polygons_from_asset(asset, sar_tmp_mask, config)
-        if vector_task:
-            print("Exporting CR2 polygons as asset")
-            execTask(vector_task)
-        else:
-            print("No CR2 polygons to export as asset")
-        print("task finished")
+        detected_pols = get_polygons_from_asset(asset, detected_pols, config)
         print("Img done")
         img_end_time = datetime.datetime.now()
         print("Elapsed time: ", img_end_time - img_start_time)
@@ -78,52 +72,56 @@ def main():
 
     # 3 - Export results
     output_options = config['output']
-    sar_tmp_mask_size = sar_tmp_mask.size().getInfo()
-    if sar_tmp_mask_size > 0:
-        print(f"Finished run. Found {sar_tmp_mask_size} CR2 polygons")
+    detected_pols_size = detected_pols.size().getInfo()
+
+    if detected_pols_size > 0:
+
+        confirmation_threshold = float(config['detection']['confirmation_threshold'])
+
+        polygons_CR2 = detected_pols.filterMetadata('n_alerts', 'greater_than', confirmation_threshold)
+        polygons_CR1 = detected_pols.filterMetadata('n_alerts', 'not_greater_than', confirmation_threshold)
+
+        CR1_size = polygons_CR1.size().getInfo()
+        CR2_size = polygons_CR2.size().getInfo()
+
+        print(f"Finished run. Found {CR1_size} CR1 polygons and {CR2_size} CR2 polygons")
         print("Exporting results of the run as shapefile")
-        ee_export_vector_silent(ee.FeatureCollection(sar_tmp_mask),
+        ee_export_vector_silent(ee.FeatureCollection(polygons_CR2),
                                 os.path.join(output_options['local_export_folder'],
                                              output_options[
                                                  'output_prefix'] + "_CR2_" + initial_data + "_" + end_data + ".shp"))
+        ee_export_vector_silent(ee.FeatureCollection(polygons_CR1),
+                                os.path.join(output_options['local_export_folder'],
+                                             output_options[
+                                                 'output_prefix'] + "_CR1_" + initial_data + "_" + end_data + ".shp"))
         # write trigger file
         with open(os.path.join(output_options['local_export_folder'], 'trigger.txt'), 'w') as fp:
-            descripition = output_options['output_prefix'] + "_CR2_" + initial_data + "_" + end_data + ".shp"
+            description = output_options['output_prefix'] + "_CR2_" + initial_data + "_" + end_data + ".shp"
             fp.write(description)
             fp.close()
         # Export to drive
-        task = ee.batch.Export.table.toDrive(collection=sar_tmp_mask,
+        task = ee.batch.Export.table.toDrive(collection=polygons_CR2,
                                              description=output_options[
                                                              'output_prefix'] + "_CR2_" + initial_data + "_" + end_data,
                                              fileFormat="SHP", folder=output_options['gdrive_export_folder'])
         execTask(task)
 
-    # 4 - Update SAR mask
-    sar_tmp_mask_size_desm = sar_tmp_mask.filterMetadata('class', 'equals', 'DESMATAMENTO').size().getInfo()
-
-    if sar_tmp_mask_size_desm > 0 and config['masks']['update_sar_mask'] == "True":
-        sar_mask_asset = config['masks']['sar_mask_asset']
-        print("Updating SAR mask")
-        new_sar_mask = ee.Image(sar_mask_asset).blend(
-            ee.Image(sar_tmp_mask
-                     .filterMetadata('class', 'equals', 'DESMATAMENTO')
-                     .map(lambda ft: ft.set('desm', 1))
-                     .reduceToImage(['desm'], 'first'))) \
-            .selfMask()
-        update_task = ee.batch.Export.image.toAsset(image=new_sar_mask, description='run_update_sar_mask',
-                                                    assetId=sar_mask_asset + '_tmp', scale=20,
-                                                    maxPixels=10000000000000)
-        execTask(update_task)
-        try:
-            ee.data.deleteAsset(sar_mask_asset + "_old")
-        except:
-            print("Warning: no old version of sar mask found")
-        try:
-            ee.data.renameAsset(sar_mask_asset, sar_mask_asset + "_old")
-            ee.data.renameAsset(sar_mask_asset + "_tmp", sar_mask_asset)
-        except:
-            print("Warning: There was an error updating the CR2 mask. Please verify assets.")
-
+        # 4 - Update SAR mask
+        if CR2_size > 0 and config['masks']['update_sar_mask'] == "True":
+            complementary_sar_col = config['masks']['complementary_sar_col']
+            print("Updating SAR mask")
+            polygons_CR2_CR_raster = ee.Image(polygons_CR2
+                                              .filterMetadata('class', 'equals', 'CLEAR_CUT')
+                                              .map(lambda ft: ft.set('desm', 1))
+                                              .reduceToImage(['desm'], 'first')) \
+                                            .unmask()
+            update_task = ee.batch.Export.image.toAsset(image=polygons_CR2_CR_raster,
+                                                        description='run_update_sar_mask',
+                                                        assetId=complementary_sar_col + '/' + output_options['output_prefix'] + "_CR2_" + initial_data + "_" + end_data,
+                                                        scale=int(config['detection']['general_scale']),
+                                                        region=polygons_CR2.geometry().buffer(1000).bounds(),
+                                                        maxPixels=10000000000000)
+            execTask(update_task)
 
     # 5 - End of run
 

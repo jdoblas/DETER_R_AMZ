@@ -16,7 +16,7 @@ from lib.sar_ee_utils import toDB, getS1dataFloat, refinedLeeFilter, toGamma0nat
 from get_masks import get_forest_mask, get_deforestation_mask
 from timeit import default_timer as timer
 
-def get_raster_warnings(img_id, sar_tmp_mask, config):
+def get_raster_warnings(img_id, detected_pols, config):
     # 0 - Initialize
     options = config['detection']
     output_options = config['output']
@@ -76,7 +76,7 @@ def get_raster_warnings(img_id, sar_tmp_mask, config):
     print("Initializing detection")
 
     # Define collections
-    forestMask = get_forest_mask(sar_tmp_mask, AOI, config)
+    forestMask = get_forest_mask(detected_pols, AOI, config)
 
     learnCol = colS1.select(0).filterDate(date1, date2)
     detectionCol = colS1_f2.select(0).filterDate(date2, date3) \
