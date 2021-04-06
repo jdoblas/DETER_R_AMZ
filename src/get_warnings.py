@@ -32,7 +32,7 @@ def get_raster_warnings(img_id, detected_pols, config):
     # 2 - Exports clipped footprint (optional)
     if output_options['export_footprints'] == 'True':
         print("Exporting footprint")
-        ee_export_vector_silent(ee.FeatureCollection(AOI), \
+        ee_export_vector_silent(ee.FeatureCollection(AOI),
                                 os.path.join(output_options['local_export_folder'],
                                              output_options['output_prefix'] + "_IMG_" + img_id + ".kml"))
 

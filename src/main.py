@@ -113,8 +113,7 @@ def main():
             polygons_CR2_CR_raster = ee.Image(polygons_CR2
                                               .filterMetadata('class', 'equals', 'CLEAR_CUT')
                                               .map(lambda ft: ft.set('desm', 1))
-                                              .reduceToImage(['desm'], 'first')) \
-                                            .unmask()
+                                              .reduceToImage(['desm'], 'first'))
             try:
                 ee.data.deleteAsset(complementary_sar_col + '/' + output_options['output_prefix'] + "_CR2_" + initial_data + "_" + end_data)
             except:
