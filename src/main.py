@@ -115,6 +115,10 @@ def main():
                                               .map(lambda ft: ft.set('desm', 1))
                                               .reduceToImage(['desm'], 'first')) \
                                             .unmask()
+            try:
+                ee.data.deleteAsset(complementary_sar_col + '/' + output_options['output_prefix'] + "_CR2_" + initial_data + "_" + end_data)
+            except:
+                pass
             update_task = ee.batch.Export.image.toAsset(image=polygons_CR2_CR_raster,
                                                         description='run_update_sar_mask',
                                                         assetId=complementary_sar_col + '/' + output_options['output_prefix'] + "_CR2_" + initial_data + "_" + end_data,
