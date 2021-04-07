@@ -25,8 +25,8 @@ def main():
     if len(args) < 2:
         raise SystemExit(USAGE)
     else:
-        initial_data = args[0]
-        end_data = args[1]
+        initial_date = args[0]
+        end_date =     args[1]
     if len(args) == 3:
         config_file = args[2]
     else:
@@ -46,7 +46,7 @@ def main():
         ee.Initialize()
 
     # 1 - get new images
-    new_images_id_list = get_image_ids(initial_data, end_data, config)
+    new_images_id_list = get_image_ids(initial_date, end_date, config)
 
     # 2 - Initiate main loop
     print("Starting detection")
@@ -89,20 +89,20 @@ def main():
         ee_export_vector_silent(ee.FeatureCollection(polygons_CR2),
                                 os.path.join(output_options['local_export_folder'],
                                              output_options[
-                                                 'output_prefix'] + "_CR2_" + initial_data + "_" + end_data + ".shp"))
+                                                 'output_prefix'] + "_CR2_" + initial_date + "_" + end_date + ".shp"))
         ee_export_vector_silent(ee.FeatureCollection(polygons_CR1),
                                 os.path.join(output_options['local_export_folder'],
                                              output_options[
-                                                 'output_prefix'] + "_CR1_" + initial_data + "_" + end_data + ".shp"))
+                                                 'output_prefix'] + "_CR1_" + initial_date + "_" + end_date + ".shp"))
         # write trigger file
         with open(os.path.join(output_options['local_export_folder'], 'trigger.txt'), 'w') as fp:
-            description = output_options['output_prefix'] + "_CR2_" + initial_data + "_" + end_data + ".shp"
+            description = output_options['output_prefix'] + "_CR2_" + initial_date + "_" + end_date + ".shp"
             fp.write(description)
             fp.close()
         # Export to drive
         task = ee.batch.Export.table.toDrive(collection=polygons_CR2,
                                              description=output_options[
-                                                             'output_prefix'] + "_CR2_" + initial_data + "_" + end_data,
+                                                             'output_prefix'] + "_CR2_" + initial_date + "_" + end_date,
                                              fileFormat="SHP", folder=output_options['gdrive_export_folder'])
         execTask(task)
 
@@ -113,14 +113,16 @@ def main():
             polygons_CR2_CR_raster = ee.Image(polygons_CR2
                                               .filterMetadata('class', 'equals', 'CLEAR_CUT')
                                               .map(lambda ft: ft.set('desm', 1))
-                                              .reduceToImage(['desm'], 'first'))
+                                              .reduceToImage(['desm'], 'first'))\
+                                            .set('system:time_start', ee.Date(initial_date).millis())\
+                                            .set('system:time_end',   ee.Date(end_date).millis())
             try:
-                ee.data.deleteAsset(complementary_sar_col + '/' + output_options['output_prefix'] + "_CR2_" + initial_data + "_" + end_data)
+                ee.data.deleteAsset(complementary_sar_col + '/' + output_options['output_prefix'] + "_CR2_" + initial_date + "_" + end_date)
             except:
                 pass
             update_task = ee.batch.Export.image.toAsset(image=polygons_CR2_CR_raster,
                                                         description='run_update_sar_mask',
-                                                        assetId=complementary_sar_col + '/' + output_options['output_prefix'] + "_CR2_" + initial_data + "_" + end_data,
+                                                        assetId=complementary_sar_col + '/' + output_options['output_prefix'] + "_CR2_" + initial_date + "_" + end_date,
                                                         scale=int(config['detection']['general_scale']),
                                                         region=polygons_CR2.geometry().buffer(1000).bounds(),
                                                         maxPixels=10000000000000)
