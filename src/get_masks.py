@@ -21,10 +21,9 @@ def get_forest_mask(detected_pols, AOI, config):
     if clear_cut_detected_pols.size().getInfo() > 0:
         ongoing_sar_mask = ee.Image(clear_cut_detected_pols
                                     .map(lambda ft: ft.set('desm', 1))
-                                    .reduceToImage(['desm'], 'first'))\
-                                    .unmask(0, False)
+                                    .reduceToImage(['desm'], 'first'))
     else:
-        ongoing_sar_mask = ee.Image(0)
+        ongoing_sar_mask = ee.Image(0).selfMask()
 
     deforestationMask = ee.Image(static_mask_asset) \
         .blend(ee.Image(updated_deforestation_mask)) \
