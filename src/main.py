@@ -100,11 +100,17 @@ def main():
             fp.write(description)
             fp.close()
         # Export to drive
-        task = ee.batch.Export.table.toDrive(collection=polygons_CR2,
+        task1 = ee.batch.Export.table.toDrive(collection=polygons_CR1,
+                                             description=output_options[
+                                                             'output_prefix'] + "_CR1_" + initial_date + "_" + end_date,
+                                             fileFormat="SHP", folder=output_options['gdrive_export_folder'])
+        execTask(task1)
+
+        task2 = ee.batch.Export.table.toDrive(collection=polygons_CR2,
                                              description=output_options[
                                                              'output_prefix'] + "_CR2_" + initial_date + "_" + end_date,
                                              fileFormat="SHP", folder=output_options['gdrive_export_folder'])
-        execTask(task)
+        execTask(task2)
 
         # 4 - Update SAR mask
         if CR2_size > 0 and config['masks']['update_sar_mask'] == "True":
