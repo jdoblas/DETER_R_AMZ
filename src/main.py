@@ -96,7 +96,7 @@ def main():
                                                  'output_prefix'] + "_CR1_" + initial_date + "_" + end_date + ".shp"))
         # write trigger file
         with open(os.path.join(output_options['local_export_folder'], 'trigger.txt'), 'w') as fp:
-            description = output_options['output_prefix'] + "_CR2_" + initial_date + "_" + end_date + ".shp"
+            description = output_options['output_prefix'] + "_CR2_" + initial_date + "_" + end_date + ".zip"
             fp.write(description)
             fp.close()
         # Export to drive
