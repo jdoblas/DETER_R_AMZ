@@ -1,6 +1,13 @@
-import ee, math
+import ee
+import math
+
+from sar_ee_utils import toDB,toNatural
+
 
 def harmonic_detrending(col, band):
+
+    col = col.map(toDB)
+
     def addVariables(image):
         years = image.date().difference('2016-01-01', 'year')
         return image.addBands(ee.Image(years).rename('t')).addBands(ee.Image.constant(1)).float()
@@ -36,4 +43,4 @@ def harmonic_detrending(col, band):
 
     fittedHarmonic = harmonicsS1.map(computeFittedHarmonicNoIntercept)
     col_stable = fittedHarmonic.select("residual")
-    return (col_stable)
+    return (col_stable.map(toNatural))

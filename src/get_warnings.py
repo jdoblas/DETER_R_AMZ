@@ -55,6 +55,9 @@ def get_raster_warnings(img_id, detected_pols, config):
         colS1 = colS1.filterMetadata("relativeOrbitNumber_start", "equals", img.get('relativeOrbitNumber_start'))
     if config['image_selection']['include_S1B'] == 'False':
         colS1 = colS1.filterMetadata("platform_number", "equals", "A")
+    if options['harmonic_detrend'] == 'True':
+            colS1 = harmonic_detrending(colS1, 'VHg0')
+
         # First status messages
     print("Detecting warnings")
     print("Learning period start: " + date1.format('YYYY-MM-dd').getInfo())
@@ -79,11 +82,8 @@ def get_raster_warnings(img_id, detected_pols, config):
     # Define collections
     forestMask = get_forest_mask(detected_pols, AOI, config)
 
-    colS1 = colS1.map(toDB)
-    if options['harmonic_detrend'] == 'True':
-        colS1 = harmonic_detrending(colS1,'VHg0')
     learnCol = colS1.select(0).filterDate(date1, date2)
-    detectionCol = colS1_f2.select(0).filterDate(date2, date3) \
+    detectionCol = colS1_f2.select(0).map(toDB).filterDate(date2, date3) \
         .map(lambda img: img.updateMask(forestMask).addBands(
          ee.Image(img.date().difference("2020-01-01", "days")).int16().rename("julian_day")))
 
@@ -96,7 +96,7 @@ def get_raster_warnings(img_id, detected_pols, config):
         ALT_threshold = float(options['threshold_max'])
     mean_dif_mean_p1 = ee.Image(1.31)
     sd_dif_mean_p1 = ee.Image(0.35)
-    detection_threshold_db = learnCol.median() \
+    detection_threshold_db = learnCol.median().toDB() \
         .subtract(mean_dif_mean_p1.add(ALT_threshold.multiply(sd_dif_mean_p1)))
 
     # Detect warning areas
