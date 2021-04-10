@@ -96,7 +96,7 @@ def get_raster_warnings(img_id, detected_pols, config):
         ALT_threshold = float(options['threshold_max'])
     mean_dif_mean_p1 = ee.Image(1.31)
     sd_dif_mean_p1 = ee.Image(0.35)
-    detection_threshold_db = learnCol.median().toDB() \
+    detection_threshold_db = toDB(learnCol.median()) \
         .subtract(mean_dif_mean_p1.add(ALT_threshold.multiply(sd_dif_mean_p1)))
 
     # Detect warning areas
