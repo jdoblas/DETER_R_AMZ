@@ -68,7 +68,7 @@ def get_raster_warnings(img_id, detected_pols, config):
     # 4 - Filter collection 
 
     median5 = makeMedianFilter(5)
-    colS1_f = QueganYuFilter(colS1.select(['VHg0']), median5).map(refinedLeeFilter)
+    colS1_f = QueganYuFilter(colS1.select(0), median5).map(refinedLeeFilter)
 
     # add date band and filters out extreme Local Incidence Angles to avoid misdetections
 
