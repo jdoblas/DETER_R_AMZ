@@ -30,10 +30,10 @@ def get_forest_mask(detected_pols, AOI, config):
         .blend(ee.Image(updated_deforestation_mask).toByte()) \
         .blend(ee.Image(ongoing_sar_mask)) \
         .blend(ee.ImageCollection(complementary_sar_mask_col)
-               .map(lambda img: img.unmask(0, False))
+               .map(lambda img: img.rename(['first']).unmask(0, False))
                .reduce(ee.Reducer.anyNonZero())
                .selfMask())\
-        .blend(ee.Image('JRC/GSW1_0/GlobalSurfaceWater').select('max_extent').focal_max(100,'circle','meters'))\
+        .blend(ee.Image('JRC/GSW1_0/GlobalSurfaceWater').select('max_extent').focal_max(60,'circle','meters'))\
         .unmask(0, False)
     forestMask = deforestationMask.Not().clip(AOI)
 
