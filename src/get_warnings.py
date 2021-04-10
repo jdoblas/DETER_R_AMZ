@@ -56,6 +56,7 @@ def get_raster_warnings(img_id, detected_pols, config):
     if config['image_selection']['include_S1B'] == 'False':
         colS1 = colS1.filterMetadata("platform_number", "equals", "A")
     if options['harmonic_detrend'] == 'True':
+            print ('Using harmonic detrending')
             colS1 = harmonic_detrending(colS1, 'VHg0').combine(colS1.select(['LIA']))
 
         # First status messages
