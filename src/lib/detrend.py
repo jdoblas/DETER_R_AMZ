@@ -1,7 +1,7 @@
 import ee
 import math
 
-from sar_ee_utils import toDB,toNatural
+from lib.sar_ee_utils import toDB,toNatural
 
 
 def harmonic_detrending(col, band):
