@@ -48,16 +48,16 @@ def get_polygons_from_asset(asset, detected_pols, config):
     print(f"Found {CR1_size} CR1 polygons and {CR2_size} CR2 polygons")
 
     # Output polygons
-    output_prefix = output_options['output_prefix']
+    asset_name = asset.split("/")[-1]
 
     if (CR1_size > 0) and output_options['export_img_polygons'] == 'True':
         print("Exporting CR1 warning polygons")
         ee_export_vector_silent(polygons_CR1,
-                                os.path.join(output_options['local_export_folder'], output_prefix + "_CR1.shp"))
+                                os.path.join(output_options['local_export_folder'], asset_name + "_CR1.shp"))
     if (CR2_size > 0) and output_options['export_img_polygons'] == 'True':
         print("Exporting CR2 warning polygons")
         ee_export_vector_silent(polygons_CR2,
-                                os.path.join(output_options['local_export_folder'], output_prefix + "_CR2.shp"))
+                                os.path.join(output_options['local_export_folder'], asset_name + "_CR2.shp"))
     return detected_pols
 
 
