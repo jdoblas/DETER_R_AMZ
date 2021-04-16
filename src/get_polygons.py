@@ -35,7 +35,7 @@ def get_polygons_from_asset(asset, detected_pols, config):
         .select(['area_ha', 'n_alerts_median', 'intensity_median', 'label', 'system:index', 'daydetec_mode'],
                 ['area_ha', 'n_alerts', 'intensity', 'label', 'system:index', 'daydetec'])
 
-    print (vector.first().propertyNames().getInfo())
+    #print (vector.first().propertyNames().getInfo())
 
     vector = vector.filterMetadata('intensity', 'not_greater_than', intensity_threshold).map(
         lambda ft: ft.set('class', 'DEGRADATION')) \
@@ -75,5 +75,5 @@ if __name__ == "__main__":
     config_file = os.path.dirname(os.path.abspath(__file__)) + os.sep + 'config' + os.sep + config_filename
     config = configparser.ConfigParser()
     config.read(config_file)
-    test_asset = 'users/detersaree/DETER_SAR_DATA_TMP/DETER_R_S1A_IW_GRDH_1SDV_20190103T092406_20190103T092431_025311_02CCE7_CE4E_raster'
+    test_asset = 'users/detersaree/DETER_R_2021_OUTPUT/DETER_R_AMZ_S1A_IW_GRDH_1SDV_20210413T094535_20210413T094604_037430_04697D_4087_raster'
     sar_tmp_mask_test = get_polygons_from_asset(test_asset, sar_tmp_mask_test, config)
