@@ -142,6 +142,17 @@ def getDESCCorners(f):
   return ee.Feature(ee.Geometry.LineString([crdLons.get(crdLats.indexOf(maxLat)), maxLat,
     minLon, crdLats.get(crdLons.indexOf(minLon))]), { 'azimuth': azimuth}).copyProperties(f)
 
+#/ Mask border values  #/
+def maskEdgesDESCimg(img):
+  az=ee.Number(getDESCCorners(img).get('azimuth'))
+  total_d = ee.Number(1000)
+  mask = img.select(0).unmask(0).gt(0).selfMask()
+  displacement = ee.Image(total_d.multiply(az.sin())).addBands(total_d.multiply(az.cos()))
+  maskD1 = mask.displace(displacement,'nearest_neighbor')
+  maskD2 = mask.displace(displacement.multiply(-1),'nearest_neighbor')
+  return img.updateMask(maskD1.And(maskD2))
+
+
 def makeFrostFilter(frostDamp, ksize):
     r=(ksize-1)/2
     # Frost filter by Guido Lemoine
