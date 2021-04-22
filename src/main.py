@@ -117,7 +117,7 @@ def main():
             complementary_sar_col = config['masks']['complementary_sar_col']
             print("Updating SAR mask")
             polygons_CR2_CR_raster = ee.Image(polygons_CR2
-                                              #.filterMetadata('class', 'equals', 'CLEAR_CUT')
+                                              .filterMetadata('class', 'equals', 'CLEAR_CUT')
                                               .map(lambda ft: ft.set('desm', 1))
                                               .reduceToImage(['desm'], 'first'))\
                                             .set('system:time_start', ee.Date(initial_date).millis())\
