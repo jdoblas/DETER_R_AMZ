@@ -297,7 +297,7 @@ def ee_export_vector_silent(ee_object, filename, selectors=None):
         print('The ee_object must be an ee.FeatureCollection.')
         return
 
-    allowed_formats = ['csv', 'json', 'kml', 'kmz', 'shp']
+    allowed_formats = ['csv', 'json', 'geojson', 'kml', 'kmz', 'shp']
     filename = os.path.abspath(filename)
     basename = os.path.basename(filename)
     name = os.path.splitext(basename)[0]
@@ -324,7 +324,7 @@ def ee_export_vector_silent(ee_object, filename, selectors=None):
                 print('Attributes must be one chosen from: {} '.format(
                     ', '.join(allowed_attributes)))
                 return
-
+    selectors = selectors.append('.geo')
     try:
         #print('Generating URL ...')
         url = ee_object.getDownloadURL(

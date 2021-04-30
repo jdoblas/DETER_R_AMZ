@@ -58,11 +58,11 @@ def get_polygons_from_asset(asset, detected_pols, config):
     if (CR1_size > 0) and output_options['export_img_polygons'] == 'True':
         print("Exporting CR1 warning polygons")
         ee_export_vector_silent(polygons_CR1,
-                                os.path.join(output_options['local_export_folder'], asset_name + "_CR1.shp"))
+                                os.path.join(output_options['local_export_folder'], asset_name + "_CR1.geojson"))
     if (CR2_size > 0) and output_options['export_img_polygons'] == 'True':
         print("Exporting CR2 warning polygons")
         ee_export_vector_silent(polygons_CR2,
-                                os.path.join(output_options['local_export_folder'], asset_name + "_CR2.shp"))
+                                os.path.join(output_options['local_export_folder'], asset_name + "_CR2.geojson"))
     return detected_pols
 
 

@@ -86,31 +86,36 @@ def main():
 
         print(f"Finished run. Found {CR1_size} CR1 polygons and {CR2_size} CR2 polygons")
         print("Exporting results of the run as shapefile")
-        ee_export_vector_silent(ee.FeatureCollection(polygons_CR2),
+        if CR2_size > 0:
+            ee_export_vector_silent(ee.FeatureCollection(polygons_CR2),
                                 os.path.join(output_options['local_export_folder'],
                                              output_options[
-                                                 'output_prefix'] + "_CR2_" + initial_date + "_" + end_date + ".json"))
-        ee_export_vector_silent(ee.FeatureCollection(polygons_CR1),
+                                                 'output_prefix'] + "_CR2_" + initial_date + "_" + end_date + ".geojson"))
+        if CR2_size > 0:
+            ee_export_vector_silent(ee.FeatureCollection(polygons_CR1),
                                 os.path.join(output_options['local_export_folder'],
                                              output_options[
-                                                 'output_prefix'] + "_CR1_" + initial_date + "_" + end_date + ".json"))
+                                                 'output_prefix'] + "_CR1_" + initial_date + "_" + end_date + ".geojson"))
         # write trigger file
-        with open(os.path.join(output_options['local_export_folder'], 'trigger.txt'), 'w') as fp:
-            description = output_options['output_prefix'] + "_CR2_" + initial_date + "_" + end_date + ".json"
-            fp.write(description)
-            fp.close()
+        if CR2_size > 0:
+            with open(os.path.join(output_options['local_export_folder'], 'trigger.txt'), 'w') as fp:
+                description = output_options['output_prefix'] + "_CR2_" + initial_date + "_" + end_date + ".geojson"
+                fp.write(description)
+                fp.close()
         # Export to drive
-        task1 = ee.batch.Export.table.toDrive(collection=polygons_CR1,
-                                             description=output_options[
-                                                             'output_prefix'] + "_CR1_" + initial_date + "_" + end_date,
-                                             fileFormat="json", folder=output_options['gdrive_export_folder'])
-        execTask(task1)
+        if CR1_size > 0:
+            task1 = ee.batch.Export.table.toDrive(collection=polygons_CR1,
+                                                 description=output_options[
+                                                                 'output_prefix'] + "_CR1_" + initial_date + "_" + end_date,
+                                                 fileFormat="GeoJSON", folder=output_options['gdrive_export_folder'])
+            execTask(task1)
 
-        task2 = ee.batch.Export.table.toDrive(collection=polygons_CR2,
-                                             description=output_options[
-                                                             'output_prefix'] + "_CR2_" + initial_date + "_" + end_date,
-                                             fileFormat="json", folder=output_options['gdrive_export_folder'])
-        execTask(task2)
+        if CR2_size > 0:
+            task2 = ee.batch.Export.table.toDrive(collection=polygons_CR2,
+                                                 description=output_options[
+                                                                 'output_prefix'] + "_CR2_" + initial_date + "_" + end_date,
+                                                 fileFormat="GeoJSON", folder=output_options['gdrive_export_folder'])
+            execTask(task2)
 
         # 4 - Update SAR mask
         if CR2_size > 0 and config['masks']['update_sar_mask'] == "True":
