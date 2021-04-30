@@ -29,7 +29,7 @@ def get_polygons_from_asset(asset, detected_pols, config):
                 .Not()
     reducer = ee.Reducer.median().combine(ee.Reducer.mode(),"",True)
     vector = img.updateMask(mask)\
-        .reduceToVectors(reducer=reducer, scale=general_scale, maxPixels=7919954990, eightConnected=True) \
+        .reduceToVectors(reducer=reducer, scale=general_scale, maxPixels=7919954990, eightConnected=False) \
         .map(compute_pol_area) \
         .filterMetadata('area_ha', 'greater_than', area_threshold)\
         .select(['area_ha', 'n_alerts_median', 'intensity_median', 'label', 'system:index', 'daydetec_mode'],
