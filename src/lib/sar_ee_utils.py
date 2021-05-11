@@ -98,7 +98,10 @@ def extractDates(col):
 
 def formatDate(date):
   return ee.Date(date).format('YYYY-MM-dd')
-  
+
+def maskAngle(image):
+  angle = image.select(['angle']);
+  return image.updateMask(angle.lt(45.23993).And(angle.gt(30.63993)))
 
 def getNormalDistPdf(img,params):
   mean=params.select(0)

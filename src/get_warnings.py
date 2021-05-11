@@ -12,7 +12,8 @@ import logging
 from lib.detrend import harmonic_detrending
 from lib.sar_ee_utils import toDB, getS1dataFloat, refinedLeeFilter, toGamma0natural, \
     makeMedianFilter, QueganYuFilter, ee_export_vector_silent, \
-    computeLogisticThreshold, maskEdgesDESCimg
+    computeLogisticThreshold, maskEdgesDESCimg, maskAngle
+
 # from lib.slope_correction import slope_correction
 from get_masks import get_forest_mask, get_deforestation_mask
 from timeit import default_timer as timer
@@ -47,6 +48,7 @@ def get_raster_warnings(img_id, detected_pols, config):
     colS1 = getS1dataFloat(date1, date3) \
         .filterBounds(AOI) \
         .sort('system:time_start') \
+        .map(maskAngle)\
         .map(maskEdgesDESCimg)\
         .map(toGamma0natural) \
         .select(["VHg0", "VVg0", "LIA"])
