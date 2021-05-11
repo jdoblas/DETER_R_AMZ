@@ -130,10 +130,10 @@ def get_raster_warnings(img_id, detected_pols, config):
     output_prefix = output_options['output_prefix']
     output_asset = output_prefix + "_" + img_id + '_raster'
     output_path = asset_export_folder + '/' + output_asset
-    try:
-        ee.data.deleteAsset(output_path)
-    except:
-        pass
+    #try:
+    #    ee.data.deleteAsset(output_path)
+    #except:
+    #    pass
 
     local_task = ee.batch.Export.image.toAsset(detectionCol_warning_postprocessed, \
                                                scale=general_scale, \
@@ -149,11 +149,11 @@ if __name__ == "__main__":
 
     ee.Initialize()
     sar_tmp_mask = ee.FeatureCollection([])
-    config_filename = 'config.ini'
+    config_filename = 'config_compute_validation_dataset.ini'
     config_file = os.path.dirname(os.path.abspath(__file__)) + os.sep + 'config' + os.sep + config_filename
     config = configparser.ConfigParser()
     config.read(config_file)
-    test_img = 'S1A_IW_GRDH_1SDV_20190103T092406_20190103T092431_025311_02CCE7_CE4E'
+    test_img = 'S1A_IW_GRDH_1SDV_20200829T084938_20200829T085007_034119_03F65A_B0A5'
     task = get_raster_warnings(test_img, sar_tmp_mask, config)
     execTask(task)
 

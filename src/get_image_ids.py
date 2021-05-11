@@ -16,7 +16,7 @@ def get_image_ids(date1str,date2str,config):
     if options['selection_mode']=='ingestion_date': 
         print(f'Looking for new S1 images ingested between {date1str} and {date2str}')
     else:
-        print(f'Looking for new S1 images adquired between {date1str} and {date2str}')
+        print(f'Looking for new S1 images acquired between {date1str} and {date2str}')
     
     AOI = ee.FeatureCollection(options['area_of_interest'])
     date1=ee.Date(date1str)

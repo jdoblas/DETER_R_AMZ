@@ -30,7 +30,7 @@ def compute_pol_area(pol,proj='EPSG:5880'):
     area_ha=pol.area(maxError=1,proj=ee.Projection(proj)).divide(10000)
     return pol.set('area_ha',area_ha)
 
-def execTask(task,check_interval=15,exit_on_error= True):
+def execTask(task,check_interval=15,exit_on_error= True, overwrite= False):
     """
     This function will execute and time a earth engine task.
     It is meant to stop execution of the main script until task ends
@@ -39,35 +39,51 @@ def execTask(task,check_interval=15,exit_on_error= True):
         task (ee.task): The task to be executed
         check_interval (INT, optional): Interval to check task status. Defaults to 15.
         exit_on_error (BOOLEAN, optional): Wether script should terminate if task fails . Defaults to True.
-
+        overwrite (BOOLEAN, option): Wether an existing asset should be overwritten. Defaults to False
     Returns:
         None.
 
     """
-    
-    start_time=time.time()
-    task.start()
-    task_id=task.status().get('id')
-    task_status=task.status().get('state')
-    start_time_f=datetime.datetime.now().strftime("%b %d %Y %H:%M:%S")
-    print (f"Task {task_id} started at {start_time_f}")
-    print ("waiting for task to complete, checking every "+str(check_interval)+" seconds")
-    while task_status!='COMPLETED':
-        #print(".",end="\r")
-        time.sleep(check_interval)
+    # Check if output asset exists
+    if 'assetExportOptions' in task.config:
+        output_asset = task.config['assetExportOptions']['earthEngineDestination']['name'][35:]
+        flag = 0
+        try:
+            ee.data.getAsset(output_asset)
+        except:
+            flag = 1
+        if flag == 0 and overwrite:
+            ee.data.deleteAsset(output_asset)
+            print ('Deleting existing asset')
+    else:
+        output_asset = None
+        flag = 1
+    if flag == 1 or (flag == 0 and overwrite):
+        start_time=time.time()
+        task.start()
+        task_id=task.status().get('id')
         task_status=task.status().get('state')
-        if (task_status=="FAILED" or task_status=='CANCELED'):
-            print ()
-            print ("Sorry, error on task:")
-            print (task.status().get('error_message'))
-            if exit_on_error:
-                sys.exit()
-    end_time=time.time()
-    end_time_f=datetime.datetime.now().strftime("%b %d %Y %H:%M:%S")
-    print ('')
-    print (f"Task finished at {end_time_f}")
-    print ("Duration: "+str(round((end_time-start_time)/60,2))+" minutes")
-    return task.status().get('destination_uris')[0][78:]
+        start_time_f=datetime.datetime.now().strftime("%b %d %Y %H:%M:%S")
+        print (f"Task {task_id} started at {start_time_f}")
+        print ("waiting for task to complete, checking every "+str(check_interval)+" seconds")
+        while task_status!='COMPLETED':
+            #print(".",end="\r")
+            time.sleep(check_interval)
+            task_status=task.status().get('state')
+            if (task_status=="FAILED" or task_status=='CANCELED'):
+                print ()
+                print ("Sorry, error on task:")
+                print (task.status().get('error_message'))
+                if exit_on_error:
+                    sys.exit()
+        end_time=time.time()
+        end_time_f=datetime.datetime.now().strftime("%b %d %Y %H:%M:%S")
+        print ('')
+        print (f"Task finished at {end_time_f}")
+        print ("Duration: "+str(round((end_time-start_time)/60,2))+" minutes")
+    else:
+        print ("Output asset exists already and won't be overwritten")
+    return output_asset
 
 def toNatural(img):
   return ee.Image(ee.Image(10.0).pow(img.divide(10.0)).copyProperties(img,['system:time_start','sliceNumber']))
@@ -144,7 +160,7 @@ def getDESCCorners(f):
 
 #/ Mask border values  #/
 def maskEdgesDESCimg(img):
-  az=ee.Number(getDESCCorners(img).get('azimuth'))
+  az=ee.Number(getDESCCorners(img).get('azimuth')).multiply(math.pi/180)
   total_d = ee.Number(1000)
   mask = img.select(0).unmask(0).gt(0).selfMask()
   displacement = ee.Image(total_d.multiply(az.sin())).addBands(total_d.multiply(az.cos()))
