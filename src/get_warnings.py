@@ -104,7 +104,7 @@ def get_raster_warnings(img_id, detected_pols, config):
 
     # Detect warning areas
     detectionCol_db_below_threshold = detectionCol.select(0).map(lambda img: img.subtract(detection_threshold_db))
-    detectionCol_warning = detectionCol_db_below_threshold.map(lambda img: img.lt(0))
+    detectionCol_warning = detectionCol_db_below_threshold.map(lambda img: img.lt(0).unmask(0))
     warning_count = detectionCol_warning.sum()
     warning_mask = warning_count.gte(1)
 
@@ -124,7 +124,15 @@ def get_raster_warnings(img_id, detected_pols, config):
         .rename("alert") \
         .addBands(warning_count.rename("n_alerts").updateMask(warning_mask)) \
         .addBands(dd.rename("daydetec").updateMask(warning_mask)) \
-        .addBands(detectionCol_db_below_threshold.min().multiply(-10).rename("intensity").updateMask(warning_mask))
+        .addBands(detectionCol_db_below_threshold.min().multiply(-10).rename("intensity").updateMask(warning_mask))\
+        .clip(AOI)
+
+    # Remove small detections
+    minPixels = ee.Number(float(options['area_threshold'])*10000/(general_scale*general_scale)).toInt().getInfo()
+    little_ones = detectionCol_warning_postprocessed.select(0)\
+        .connectedPixelCount(**{'eightConnected': False, 'maxSize': minPixels+1})\
+        .lte(minPixels)
+    detectionCol_warning_postprocessed = detectionCol_warning_postprocessed.updateMask(little_ones.unmask(0,False).Not())
 
     # 6 - Export of the results
 
