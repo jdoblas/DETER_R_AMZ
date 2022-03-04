@@ -1,12 +1,12 @@
 #!/bin/bash
+BASE_DIR="/usr/local/data/DETER_R_AMZ"
 TODAY=$(date  '+%Y-%m-%d')
-echo "Running SAR_EWS on "$TODAY
-echo "Check log on "$HOME"/logs/detection_"$TODAY".log"
+echo "Running DETER_R_AMZ on "$TODAY
+echo "Check log on "$BASE_DIR"/logs/detection_"$TODAY".log"
 START_DATE=$1
 END_DATE=$2
 # run app
-source ~/miniconda3/etc/profile.d/conda.sh \
+source /opt/conda/etc/profile.d/conda.sh \
 && conda activate ee \
-&& cd $HOME/CODE/DETER_SAR_EWS/sar_ews \
-&& nohup python -u main.py "$START_DATE" "$END_DATE"  > "$HOME/logs/detection_$TODAY.log" &
-tail -f "$HOME/logs/detection_$TODAY.log"
+&& cd $BASE_DIR/src \
+&& nohup python -u main.py "$START_DATE" "$END_DATE"  > "$BASE_DIR/logs/detection_$TODAY.log" &
