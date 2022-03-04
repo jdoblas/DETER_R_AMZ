@@ -1,5 +1,6 @@
-src/config/config.ini
-src/config/config_test.ini
+**/logs/*
+**/output/**
+src/config/*.ini
 __pycache__/
 # Spyder project settings
 .spyderproject
