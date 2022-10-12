@@ -13,7 +13,7 @@ def get_forest_mask(detected_pols, AOI, config):
     options = config['masks']
     static_mask_asset = options['static']
     updated_deforestation_mask = options['updated_deforestation']
-    complementary_sar_mask_col = options['complementary_sar_col']
+    complementary_sar_mask_col = options['ongoing_sar_mask_col']
 
     clear_cut_detected_pols = detected_pols.filterMetadata('intensity', 'greater_than', float(config['detection']['intensity_threshold'])) \
                                         .filterMetadata('n_alerts', 'greater_than', float(config['detection']['confirmation_threshold']))\
